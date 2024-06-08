@@ -2,7 +2,7 @@ use crate::{
     consts::{HEIGHT, TILE_HEIGHT, TILE_SIZE, TILE_WIDTH, WIDTH},
     tile::{Tile, TileType},
 };
-use bevy::prelude::*;
+use bevy::{prelude::*, utils::HashSet};
 
 pub struct BoardPlugin;
 
@@ -39,6 +39,19 @@ impl Board {
         board
     }
 
+    pub fn height(&self) -> usize {
+        self.tiles.first().unwrap().len()
+    }
+    pub fn width(&self) -> usize {
+        self.tiles.len()
+    }
+
+    pub fn swap(&mut self, x1: usize, y1: usize, x2: usize, y2: usize) {
+        let temp = self.get(x1, y1).unwrap();
+        self.set(x1, y1, self.get(x2, y2).unwrap()).unwrap();
+        self.set(x2, y2, temp).unwrap();
+    }
+
     pub fn get(&self, x: usize, y: usize) -> Option<Tile> {
         if self.is_in_bounds(x, y) {
             Some(self.tiles[x][y])
@@ -55,6 +68,42 @@ impl Board {
         } else {
             Err(format!("Index ({}, {}) out of bounds.", x, y).to_string())
         }
+    }
+
+    pub fn set_radius(
+        &mut self,
+        x: usize,
+        y: usize,
+        tile: Tile,
+        radius: isize,
+    ) -> Result<(), String> {
+        self.set(x, y, tile);
+
+        let center_x = x as i32;
+        let center_y = y as i32;
+
+        for dx in -radius as i32..=radius as i32 {
+            for dy in -radius as i32..=radius as i32 {
+                if dx == 0 && dy == 0 {
+                    continue;
+                }
+
+                let distance_squared = dx.pow(2) + dy.pow(2);
+
+                if distance_squared <= radius as i32 * radius as i32 {
+                    let abs_x = center_x + dx;
+                    let abs_y = center_y + dy;
+
+                    // if let Some(tile) = self.get(abs_x as usize, abs_y as usize) {
+                    //     if tile.tile_type == TileType::None {
+                    self.set(abs_x as usize, abs_y as usize, tile);
+                    //     }
+                    // }
+                }
+            }
+        }
+
+        Ok(())
     }
 
     fn is_in_bounds(&self, x: usize, y: usize) -> bool {

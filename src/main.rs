@@ -1,3 +1,4 @@
+use bevy_egui::EguiPlugin;
 use consts::{HEIGHT, TILE_HEIGHT, TILE_SIZE, TILE_WIDTH, WIDTH};
 mod board;
 mod consts;
@@ -29,7 +30,8 @@ fn main() {
         .insert_resource(Time::<Fixed>::from_hz(4.))
         .add_plugins((
             BoardPlugin,
-            WorldInspectorPlugin::new(),
+            // WorldInspectorPlugin::new(),
+            EguiPlugin,
             ControlsPlugin,
             FrameTimeDiagnosticsPlugin,
             PhysicsPlugin,
